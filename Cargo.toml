@@ -3,3 +3,7 @@
 name = "lisp-in-rust"
 version = "0.0.1"
 authors = ["Artyom Keydunov <artyom.keydunov@gmail.com>"]
+
+[dependencies.readline]
+
+git = "https://github.com/shaleh/rust-readline"
