@@ -1,3 +1,5 @@
+#![feature(globs)]
+
 use std::io::stdio;
 use evaluator::Evaluator;
 
