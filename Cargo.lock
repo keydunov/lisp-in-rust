@@ -1,0 +1,4 @@
+[root]
+name = "lisp-in-rust"
+version = "0.0.1"
+
