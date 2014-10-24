@@ -4,6 +4,7 @@ pub enum Sexpr {
   Int(i32),
   Symbol(String),
   Cons(Box<Sexpr>, Box<Sexpr>),
+  List(Vec<Box<Sexpr>>),
 }
 
 type ParseResult = Result<Sexpr, String>;
@@ -49,7 +50,7 @@ impl Parser {
       c if c.is_digit() => self.parse_number(),
       '(' => {
         self.consume_char();
-        self.parse_list()
+        self.parse_list_second()
       }
       _ => self.parse_symbol()
     }
@@ -69,6 +70,16 @@ impl Parser {
     let string = self.consume_while(|char| { char.is_digit() });
     self.consume_whitespace();
     Ok(Int(from_str::<i32>(string.as_slice()).unwrap()))
+  }
+
+  fn parse_list_second(&mut self) -> ParseResult {
+    let mut children = vec!();
+    self.consume_whitespace();
+    while self.next_char() != ')' {
+      children.push(box try!(self.parse()))
+    }
+
+    Ok(List(children))
   }
 
   fn parse_list(&mut self) -> ParseResult {
@@ -162,16 +173,32 @@ mod tests {
       };
   }
 
+  //#[test]
+  //fn parses_lists() {
+  //    let result = parse("(1 2 3)".to_string());
+  //    assert!(result.is_ok(), "parse failed: {}", result);
+  //    let sexp = result.unwrap();
+  //    match sexp {
+  //        Cons(box Int(x), box Cons(box Int(y), box Cons(box Int(z), box Nil))) => {
+  //            assert_eq!(x, 1);
+  //            assert_eq!(y, 2);
+  //            assert_eq!(z, 3);
+  //        },
+  //        _ => fail!("Parsed incorrectly, got {}", sexp)
+  //    };
+  //}
+
   #[test]
-  fn parses_lists() {
+  fn parses_lists_second() {
       let result = parse("(1 2 3)".to_string());
       assert!(result.is_ok(), "parse failed: {}", result);
       let sexp = result.unwrap();
       match sexp {
-          Cons(box Int(x), box Cons(box Int(y), box Cons(box Int(z), box Nil))) => {
-              assert_eq!(x, 1);
-              assert_eq!(y, 2);
-              assert_eq!(z, 3);
+          List(children) => {
+            match children[0] {
+              box Int(x) => assert_eq!(x, 1),
+              _ => fail!("Parsed incorrectly, got {}", children[0])
+              }
           },
           _ => fail!("Parsed incorrectly, got {}", sexp)
       };
