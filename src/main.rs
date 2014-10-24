@@ -20,7 +20,6 @@ fn process_line(line: String, evaluator: Evaluator) {
 }
 
 fn repl() {
-  // TODO: build with environment
   let evaluator = Evaluator::new();
   loop {
     print!("lisp> ");

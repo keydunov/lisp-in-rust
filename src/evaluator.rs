@@ -33,8 +33,7 @@ impl Evaluator {
 
   pub fn eval(&self, sexpr: parser::Sexpr) -> EvalResult {
     match sexpr {
-      parser::Nil => Ok(Nil),
-      parser::Int(x) => Ok(Int(x))
+      _ => Ok(Nil)
     }
   }
 }

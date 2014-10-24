@@ -2,6 +2,7 @@
 pub enum Sexpr {
   Nil,
   Int(i32),
+  Symbol(String)
 }
 
 type ParseResult = Result<Sexpr, String>;
@@ -17,12 +18,35 @@ pub fn parse(source: String) -> ParseResult {
     parser.parse()
 }
 
+trait Identifiable {
+  fn is_valid_for_identifier(&self) -> bool;
+}
+
+impl Identifiable for char {
+  fn is_valid_for_identifier(&self) -> bool {
+      match *self {
+          '!' | '$' | '%' | '&' | '*' | '+' | '-' | '.' | '~' |
+          '/' | ':' | '<' | '=' | '>' | '?' | '@' | '^' | '_' |
+          'a'...'z' | 'A'...'Z' | '0'...'9' => true,
+          _ => false
+      }
+  }
+}
+
 impl Parser {
   fn parse(&mut self) -> ParseResult {
     match self.next_char() {
       c if c.is_digit() => self.parse_number(),
-      _ => Ok(Nil)
+      _ => self.parse_symbol()
+    }
+  }
 
+  fn parse_symbol(&mut self) -> ParseResult {
+    let symbol = self.consume_while(|char| { char.is_valid_for_identifier() });
+
+    match symbol.as_slice() {
+      "nil" => Ok(Nil),
+      _     => Ok(Symbol(symbol))
     }
   }
 
@@ -30,6 +54,7 @@ impl Parser {
     let string = self.consume_while(|char| { char.is_digit() });
     Ok(Int(from_str::<i32>(string.as_slice()).unwrap()))
   }
+
 
   /// Consume and discard zero or more whitespace characters.
   fn consume_whitespace(&mut self) {
@@ -79,6 +104,17 @@ mod tests {
       let sexp = result.unwrap();
       match sexp {
           Int(x) => assert_eq!(x, 42),
+          _ => fail!("Parsed incorrectly, got {}", sexp)
+      };
+  }
+
+  #[test]
+  fn parses_symbols() {
+      let result = parse("hello".to_string());
+      assert!(result.is_ok());
+      let sexp = result.unwrap();
+      match sexp {
+          Symbol(x) => assert_eq!(x, "hello".to_string()),
           _ => fail!("Parsed incorrectly, got {}", sexp)
       };
   }
