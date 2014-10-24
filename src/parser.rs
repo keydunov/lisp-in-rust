@@ -1,4 +1,4 @@
-#[deriving(Show)]
+#[deriving(Show, Clone)]
 pub enum Sexpr {
   Nil,
   Int(i32),
