@@ -82,17 +82,6 @@ impl Parser {
     Ok(List(children))
   }
 
-  fn parse_list_tail(&mut self) -> ParseResult {
-    let car = match self.next_char() {
-      ')' => return Ok(Nil),
-       _  => try!(self.parse())
-    };
-
-    let cdr = try!(self.parse_list_tail());
-
-    Ok(Cons(box car, box cdr))
-  }
-
   /// Consume and discard zero or more whitespace characters.
   fn consume_whitespace(&mut self) {
       self.consume_while(|c| c.is_whitespace());

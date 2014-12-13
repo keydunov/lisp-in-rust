@@ -37,18 +37,28 @@ impl Evaluator {
     let val = match sexpr {
       parser::Int(x) => Ok(Int(x)),
       parser::Symbol(x) => Ok(Symbol(x)),
+      parser::List(_) => self.eval_list(sexpr),
+      _ => Ok(Nil)
+    };
+    //println!("eval value - {}", val);
+    val
+  }
+
+  fn eval_list(&self, list: parser::Sexpr) -> EvalResult {
+    match list {
+      parser::List(ref children) if children.len() == 0 => Ok(Nil),
+      parser::List(ref children) if children.len() == 1 => self.eval(*children[0].clone()),
       parser::List(children) => {
         let operator = try!(self.eval(*children[0].clone()));
+        // TODO: Ensure operator is Symbol
         let mut x = try!(self.eval(*children[1].clone()));
         for child in children.slice_from(2).iter() {
           x = try!(self.eval_op(&operator, x, try!(self.eval(*child.clone()))));
         }
         Ok(x)
-      }
-      _ => Ok(Nil)
-    };
-    //println!("eval value - {}", val);
-    val
+      },
+      _ => Ok(Nil) // FIXME
+    }
   }
 
   fn eval_op(&self, operator: &LispValue, x: LispValue, y: LispValue) -> Result<LispValue, String> {
