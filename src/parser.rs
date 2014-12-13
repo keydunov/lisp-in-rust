@@ -50,7 +50,7 @@ impl Parser {
       c if c.is_digit() => self.parse_number(),
       '(' => {
         self.consume_char();
-        self.parse_list_second()
+        self.parse_list()
       }
       _ => self.parse_symbol()
     }
@@ -72,7 +72,7 @@ impl Parser {
     Ok(Int(from_str::<i32>(string.as_slice()).unwrap()))
   }
 
-  fn parse_list_second(&mut self) -> ParseResult {
+  fn parse_list(&mut self) -> ParseResult {
     let mut children = vec!();
     self.consume_whitespace();
     while self.next_char() != ')' {
@@ -80,23 +80,6 @@ impl Parser {
     }
 
     Ok(List(children))
-  }
-
-  fn parse_list(&mut self) -> ParseResult {
-    let car = match self.parse() {
-        Ok(value) => value,
-        Err(e) => return Err(e)
-    };
-
-    let cdr = try!(self.parse_list_tail());
-
-    match self.next_char() {
-      ')' => {
-        self.consume_char();
-        Ok(Cons(box car, box cdr))
-      },
-      _ => Err("Expected )".to_string())
-    }
   }
 
   fn parse_list_tail(&mut self) -> ParseResult {
@@ -173,30 +156,15 @@ mod tests {
       };
   }
 
-  //#[test]
-  //fn parses_lists() {
-  //    let result = parse("(1 2 3)".to_string());
-  //    assert!(result.is_ok(), "parse failed: {}", result);
-  //    let sexp = result.unwrap();
-  //    match sexp {
-  //        Cons(box Int(x), box Cons(box Int(y), box Cons(box Int(z), box Nil))) => {
-  //            assert_eq!(x, 1);
-  //            assert_eq!(y, 2);
-  //            assert_eq!(z, 3);
-  //        },
-  //        _ => fail!("Parsed incorrectly, got {}", sexp)
-  //    };
-  //}
-
   #[test]
-  fn parses_lists_second() {
+  fn parses_lists() {
       let result = parse("(1 2 3)".to_string());
       assert!(result.is_ok(), "parse failed: {}", result);
       let sexp = result.unwrap();
       match sexp {
           List(children) => {
-            match children[0] {
-              box Int(x) => assert_eq!(x, 1),
+            match children[2] {
+              box Int(x) => assert_eq!(x, 3),
               _ => fail!("Parsed incorrectly, got {}", children[0])
               }
           },

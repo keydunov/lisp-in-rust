@@ -34,22 +34,24 @@ impl Evaluator {
   }
 
   pub fn eval(&self, sexpr: parser::Sexpr) -> EvalResult {
-    match sexpr {
+    let val = match sexpr {
       parser::Int(x) => Ok(Int(x)),
       parser::Symbol(x) => Ok(Symbol(x)),
       parser::List(children) => {
         let operator = try!(self.eval(*children[0].clone()));
-        let mut result = 0;
-        for child in children.tail().iter() {
-          result = try!(self.eval_op(&operator, result, try!(self.eval(*child.clone()))));
+        let mut x = try!(self.eval(*children[1].clone()));
+        for child in children.slice_from(2).iter() {
+          x = try!(self.eval_op(&operator, x, try!(self.eval(*child.clone()))));
         }
-        Ok(Int(result))
+        Ok(x)
       }
       _ => Ok(Nil)
-    }
+    };
+    //println!("eval value - {}", val);
+    val
   }
 
-  fn eval_op(&self, operator: &LispValue, result: i32, y: LispValue) -> Result<i32, String> {
+  fn eval_op(&self, operator: &LispValue, x: LispValue, y: LispValue) -> Result<LispValue, String> {
     let op = match *operator {
       Symbol(ref o) => o,
       _ => return Err("Wrong first operator".to_string())
@@ -60,11 +62,19 @@ impl Evaluator {
       _ => return Err("Support only ints now".to_string())
     };
 
+    let x_unwrap = match x {
+      Int(i) => i,
+      _ => return Err("Support only ints now".to_string())
+    };
+
     match op.as_slice() {
-     "+" => Ok(result + y_unwrap),
-     "-" => Ok(result - y_unwrap),
-     "*" => Ok(result * y_unwrap),
-     "/" => Ok(result / y_unwrap),
+     "+" => Ok(Int(x_unwrap + y_unwrap)),
+     "-" => Ok(Int(x_unwrap - y_unwrap)),
+     "*" => Ok(Int(x_unwrap * y_unwrap)),
+     "/" => match y_unwrap {
+        y_unwrap if y_unwrap == 0 => Err("Division by zero".to_string()),
+        _ => Ok(Int(x_unwrap / y_unwrap))
+     },
       _ => Err("Not supported yet".to_string())
     }
   }
