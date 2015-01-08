@@ -1,4 +1,20 @@
 [root]
 name = "lisp-in-rust"
 version = "0.0.1"
+dependencies = [
+ "readline 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "readline"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "readline-sys 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "readline-sys"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 

@@ -1,4 +1,5 @@
-use std::io::stdio;
+extern crate readline;
+
 use evaluator::Evaluator;
 
 mod parser;
@@ -20,11 +21,13 @@ fn process_line(line: String, evaluator: &Evaluator) {
 fn repl() {
   let evaluator = Evaluator::new();
   loop {
-    print!("lisp> ");
-    let input = stdio::stdin().read_line();
+    let input = readline::readline("lisp> ");
 
     match input {
-      Ok(line) => process_line(line, &evaluator),
+      Ok(line) => {
+        readline::add_history(line.as_slice());
+        process_line(line, &evaluator);
+      }
       Err(_) => {
         println!("Quiting...");
         break;
