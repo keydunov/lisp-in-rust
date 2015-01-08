@@ -1,12 +1,4 @@
 [root]
 name = "lisp-in-rust"
 version = "0.0.1"
-dependencies = [
- "readline 0.0.1 (git+https://github.com/shaleh/rust-readline#80dfe467ecf043986a71b45e654ea818229d90ad)",
-]
-
-[[package]]
-name = "readline"
-version = "0.0.1"
-source = "git+https://github.com/shaleh/rust-readline#80dfe467ecf043986a71b45e654ea818229d90ad"
 

@@ -1,4 +1,4 @@
-#[deriving(Show, Clone)]
+#[derive(Show, Clone)]
 pub enum Sexpr {
   Nil,
   Int(i32),
@@ -39,7 +39,7 @@ impl Parser {
   fn parse(&mut self) -> ParseResult {
     self.consume_whitespace();
     if self.eof() {
-      Ok(Nil)
+      Ok(Sexpr::Nil)
     } else {
       self.do_parse()
     }
@@ -47,7 +47,7 @@ impl Parser {
 
   fn do_parse(&mut self) -> ParseResult {
     match self.next_char() {
-      c if c.is_digit() => self.parse_number(),
+      c if c.is_digit(10) => self.parse_number(),
       '(' => {
         self.consume_char();
         self.parse_list()
@@ -61,15 +61,15 @@ impl Parser {
     self.consume_whitespace();
 
     match symbol.as_slice() {
-      "nil" => Ok(Nil),
-      _     => Ok(Symbol(symbol))
+      "nil" => Ok(Sexpr::Nil),
+      _     => Ok(Sexpr::Symbol(symbol))
     }
   }
 
   fn parse_number(&mut self) -> ParseResult {
-    let string = self.consume_while(|char| { char.is_digit() });
+    let string = self.consume_while(|char| { char.is_digit(10) });
     self.consume_whitespace();
-    Ok(Int(from_str::<i32>(string.as_slice()).unwrap()))
+    Ok(Sexpr::Int(string.parse::<i32>().unwrap()))
   }
 
   fn parse_list(&mut self) -> ParseResult {
@@ -79,7 +79,7 @@ impl Parser {
       children.push(box try!(self.parse()))
     }
 
-    Ok(List(children))
+    Ok(Sexpr::List(children))
   }
 
   /// Consume and discard zero or more whitespace characters.
@@ -88,7 +88,7 @@ impl Parser {
   }
 
   /// Consume characters until `test` returns false.
-  fn consume_while(&mut self, test: |char| -> bool) -> String {
+  fn consume_while<F>(&mut self, test: F) -> String where F : Fn(char) -> bool {
       let mut result = String::new();
       while !self.eof() && test(self.next_char()) {
           result.push(self.consume_char());
@@ -106,11 +106,6 @@ impl Parser {
   /// Read the current character without consuming it.
   fn next_char(&self) -> char {
       self.input.as_slice().char_at(self.pos)
-  }
-
-  /// Does the current input start with the given string?
-  fn starts_with(&self, s: &str) -> bool {
-      self.input.as_slice().slice_from(self.pos).trim().starts_with(s)
   }
 
   /// Return true if all input is consumed.
