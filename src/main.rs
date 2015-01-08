@@ -5,7 +5,6 @@ use evaluator::Evaluator;
 mod parser;
 mod evaluator;
 
-// Try to use later https://github.com/shaleh/rust-readline
 fn process_line(line: String, evaluator: &Evaluator) {
   match parser::parse(line) {
     Ok(sexpr) => {
