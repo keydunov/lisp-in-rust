@@ -21,7 +21,7 @@ impl LispValue {
   }
 }
 
-impl fmt::Show for LispValue {
+impl fmt::String for LispValue {
   fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
     write!(fmt, "{}", self.pretty_print())
   }

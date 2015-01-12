@@ -10,13 +10,13 @@ pub enum Sexpr {
 type ParseResult = Result<Sexpr, String>;
 
 struct Parser {
-  pos: uint,
+  pos: usize,
   input: String
 }
 
 /// Parse a string and return ParseResult - either Sexpr AST or Error.
 pub fn parse(source: String) -> ParseResult {
-    let mut parser = Parser { pos: 0u, input: source };
+    let mut parser = Parser { pos: 0us, input: source };
     parser.parse()
 }
 
@@ -76,7 +76,7 @@ impl Parser {
     let mut children = vec!();
     self.consume_whitespace();
     while self.next_char() != ')' {
-      children.push(box try!(self.parse()))
+      children.push(Box::new(try!(self.parse())))
     }
 
     Ok(Sexpr::List(children))
